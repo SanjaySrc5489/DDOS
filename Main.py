@@ -1,3 +1,60 @@
+import urllib.parse
+import telebot
+from datetime import datetime, timedelta
+import json
+import os
+
+# Use your bot token here
+bot = telebot.TeleBot("6489358174:AAH2L3e-oHlyGFwe5mugwV9T26o-3G9w508")
+
+# File to store user data
+
+@bot.message_handler(commands=['trial'])
+def send_current_time(message):
+    user_id = str(message.from_user.id)
+    current_time = datetime.now()
+    user_data = load_user_data()
+    
+    user_name = message.from_user.first_name
+    username = "Sanjay_Src"
+    message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
+    encoded_message = urllib.parse.quote(message_text)
+    url = f"https://t.me/{username}?text={encoded_message}"
+
+    if user_id in user_data:
+        last_claimed_time = datetime.strptime(user_data[user_id], "%Y-%m-%d %H:%M:%S")
+        if current_time - last_claimed_time < timedelta(days=1):
+            response = f'''⚠️ *You have already claimed the trial.*
+            
+Follow the link below to buy the bot:'''
+            markup = telebot.types.InlineKeyboardMarkup()
+            button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
+            markup.add(button)
+            bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
+            return
+
+    # Save the current time as the last claimed time
+    user_data[user_id] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    save_user_data(user_data)
+
+    response = f'''✅ *Your trial for using our bot has been approved!*
+You can freely use our bot services for the next 24 hours.
+
+*Your user ID is:* `{user_id}`
+*Click the button below to buy:*'''
+    markup = telebot.types.InlineKeyboardMarkup()
+    button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
+    markup.add(button)
+    bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
+
+# Start polling
+bot.polling()
+
+
+
+//////
+
+
 #script by @SrcEsp
 
 import telebot
@@ -5,6 +62,11 @@ import subprocess
 import datetime
 import os
 import urllib.parse
+import urllib.parse
+import telebot
+from datetime import datetime, timedelta
+import json
+import os
 
 #from keep_alive import keep_alive
 #keep_alive()
@@ -213,6 +275,47 @@ def clear_logs_command(message):
     bot.reply_to(message, response)
 
 
+
+@bot.message_handler(commands=['trial'])
+def send_current_time(message):
+    user_id = str(message.from_user.id)
+    current_time = datetime.now()
+    user_data = load_user_data()
+    
+    user_name = message.from_user.first_name
+    username = "Sanjay_Src"
+    message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
+    encoded_message = urllib.parse.quote(message_text)
+    url = f"https://t.me/{username}?text={encoded_message}"
+
+    if user_id in user_data:
+        last_claimed_time = datetime.strptime(user_data[user_id], "%Y-%m-%d %H:%M:%S")
+        if current_time - last_claimed_time < timedelta(days=1):
+            response = f'''⚠️ *You have already claimed the trial.*
+            
+Follow the link below to buy the bot:'''
+            markup = telebot.types.InlineKeyboardMarkup()
+            button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
+            markup.add(button)
+            bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
+            return
+
+    # Save the current time as the last claimed time
+    user_data[user_id] = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    save_user_data(user_data)
+
+    response = f'''✅ *Your trial for using our bot has been approved!*
+You can freely use our bot services for the next 24 hours.
+
+*Your user ID is:* `{user_id}`
+*Click the button below to buy:*'''
+    markup = telebot.types.InlineKeyboardMarkup()
+    button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
+    markup.add(button)
+    bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
+    
+    
+    
 @bot.message_handler(commands=['clearusers'])
 def clear_users_command(message):
     user_id = str(message.chat.id)
@@ -371,6 +474,20 @@ def show_help(message):
                 help_text += f"{handler.commands[0]}: {handler.doc}\n"
     bot.reply_to(message, help_text)
 
+USER_DATA_FILE = "user_data.json"
+
+# Load user data from file
+def load_user_data():
+    if os.path.exists(USER_DATA_FILE):
+        with open(USER_DATA_FILE, "r") as file:
+            return json.load(file)
+    return {}
+
+# Save user data to file
+def save_user_data(user_data):
+    with open(USER_DATA_FILE, "w") as file:
+        json.dump(user_data, file)
+
 @bot.message_handler(commands=['start'])
 def welcome_start(message):
     user_name = message.from_user.first_name
@@ -379,12 +496,19 @@ def welcome_start(message):
     message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
     encoded_message = urllib.parse.quote(message_text)
     url = f"https://t.me/{username}?text={encoded_message}"
-    response = f'''❄️ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴅᴅᴏs ʙᴏᴛ, {user_name}! ᴛʜɪs ɪs ʜɪɢʜ ǫᴜᴀʟɪᴛʏ sᴇʀᴠᴇʀ ʙᴀsᴇᴅ ᴅᴅᴏs. ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.
-🤖 Try to run This Command : /help
-✅ Buy Bot From :- @SrcEsp
-\nYour user ID is {user_id}. 
-Click the Link Below to Buy: {url}'''
-    bot.send_message(message.chat.id, response)
+    response = f'''❄️ *Welcome to Premium DDoS Bot, {user_name}!*
+    
+This is a high-quality, server-based DDoS service. To get access:
+🤖 *Try to run this command:* `/help`
+✅ *Buy the bot from:* @SrcEsp
+🎉 *Press /trial To Claim Free Trial
+*Your user ID is:* `{user_id}`
+*Click the button below to buy:*'''
+    markup = telebot.types.InlineKeyboardMarkup()
+    button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
+    markup.add(button)
+    bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
+
 
 @bot.message_handler(commands=['rules'])
 def welcome_rules(message):
