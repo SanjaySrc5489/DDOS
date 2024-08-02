@@ -379,11 +379,11 @@ def welcome_start(message):
     encoded_message = urllib.parse.quote(message_text)
     url = f"https://t.me/{username}?text={encoded_message}"
     response = f'''❄️ᴡᴇʟᴄᴏᴍᴇ ᴛᴏ ᴘʀᴇᴍɪᴜᴍ ᴅᴅᴏs ʙᴏᴛ, {user_name}! ᴛʜɪs ɪs ʜɪɢʜ ǫᴜᴀʟɪᴛʏ sᴇʀᴠᴇʀ ʙᴀsᴇᴅ ᴅᴅᴏs. ᴛᴏ ɢᴇᴛ ᴀᴄᴄᴇss.
-    🤖 Try to run This Command : /help
-    ✅ Buy But From :- @SrcEsp
-    Your user ID is {user_id}. 
-    Click the Link Below to Buy: {url}'''
-bot.reply_to(message, response)
+🤖 Try to run This Command : /help
+✅ Buy Bot From :- @SrcEsp
+\nYour user ID is {user_id}. 
+Click the Link Below to Buy: {url}'''
+    bot.send_message(message.chat.id, response)
 
 @bot.message_handler(commands=['rules'])
 def welcome_rules(message):
