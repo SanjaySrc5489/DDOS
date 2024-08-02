@@ -4,55 +4,6 @@ from datetime import datetime, timedelta
 import json
 import os
 
-# Use your bot token here
-bot = telebot.TeleBot("6489358174:AAH2L3e-oHlyGFwe5mugwV9T26o-3G9w508")
-
-# File to store user data
-
-@bot.message_handler(commands=['trial'])
-def send_current_time(message):
-    user_id = str(message.from_user.id)
-    current_time = datetime.now()
-    user_data = load_user_data()
-    
-    user_name = message.from_user.first_name
-    username = "Sanjay_Src"
-    message_text = f"Hello I Want To Buy Your DDos Bot & My User ID is: {user_id}"
-    encoded_message = urllib.parse.quote(message_text)
-    url = f"https://t.me/{username}?text={encoded_message}"
-
-    if user_id in user_data:
-        last_claimed_time = datetime.strptime(user_data[user_id], "%Y-%m-%d %H:%M:%S")
-        if current_time - last_claimed_time < timedelta(days=1):
-            response = f'''⚠️ *You have already claimed the trial.*
-            
-Follow the link below to buy the bot:'''
-            markup = telebot.types.InlineKeyboardMarkup()
-            button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
-            markup.add(button)
-            bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
-            return
-
-    # Save the current time as the last claimed time
-    user_data[user_id] = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    save_user_data(user_data)
-
-    response = f'''✅ *Your trial for using our bot has been approved!*
-You can freely use our bot services for the next 24 hours.
-
-*Your user ID is:* `{user_id}`
-*Click the button below to buy:*'''
-    markup = telebot.types.InlineKeyboardMarkup()
-    button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
-    markup.add(button)
-    bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
-
-# Start polling
-bot.polling()
-
-
-
-//////
 
 
 #script by @SrcEsp
@@ -275,6 +226,21 @@ def clear_logs_command(message):
     bot.reply_to(message, response)
 
 
+def load_user_data():
+    try:
+        with open('user_data.json', 'r') as file:
+            user_data = json.load(file)
+    except FileNotFoundError:
+        user_data = {}
+    return user_data
+
+def save_user_data(user_data):
+    with open('user_data.json', 'w') as file:
+        json.dump(user_data, file)
+
+def save_user_id(user_id):
+    with open('user.txt', 'a') as file:
+        file.write(f'{user_id}\n')
 
 @bot.message_handler(commands=['trial'])
 def send_current_time(message):
@@ -304,6 +270,9 @@ Follow the link below to buy the bot:'''
     user_data[user_id] = current_time.strftime("%Y-%m-%d %H:%M:%S")
     save_user_data(user_data)
 
+    # Save the user ID to user.txt
+    save_user_id(user_id)
+
     response = f'''✅ *Your trial for using our bot has been approved!*
 You can freely use our bot services for the next 24 hours.
 
@@ -313,8 +282,7 @@ You can freely use our bot services for the next 24 hours.
     button = telebot.types.InlineKeyboardButton(text="💎 Click Here to Buy 💎", url=url)
     markup.add(button)
     bot.send_message(message.chat.id, response, reply_markup=markup, parse_mode='Markdown')
-    
-    
+
     
 @bot.message_handler(commands=['clearusers'])
 def clear_users_command(message):
