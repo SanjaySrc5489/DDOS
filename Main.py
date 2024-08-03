@@ -564,16 +564,9 @@ Click /help to View Commands'''
 
 
 
-
-
-
-
-
-
-
 bgmi_cooldown = {}
-
 COOLDOWN_TIME = 30
+
 
 # Handler for /bgmi command
 @bot.message_handler(commands=['bgmi'])
@@ -596,7 +589,7 @@ def handle_bgmi(message):
             port = int(command[2])  # Convert port to integer
             time = int(command[3])  # Convert time to integer
             if time > 2000:
-                response = "Error: Time interval must be less than 1200."
+                response = "Error: Time interval must be less than 2000."
             else:
                 record_command_logs(user_id, '/bgmi', target, port, time)
                 log_command(user_id, target, port, time)
@@ -608,10 +601,13 @@ def handle_bgmi(message):
         else:
             response = "✅ 𝙐𝙨𝙖𝙜𝙚 :- /𝙗𝙜𝙢𝙞 <target> <port> <time>"  # Updated command syntax
     else:
-        response = ("🚫 Unauthorized Access! 🚫\n\nOops! It seems like you don't have permission to use the /bgmi command. DM TO BUY ACCESS:- @DONATE_OWNER_BOT")
+        response = "🚫 Unauthorized Access! 🚫\n\nOops! It seems like you don't have permission to use the /bgmi command. DM TO BUY ACCESS:- @DONATE_OWNER_BOT"
 
     bot.reply_to(message, response)
-    
+
+
+
+
 
 @bot.message_handler(commands=['rules'])
 def welcome_rules(message):
