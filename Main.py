@@ -26,7 +26,7 @@ admin_id = ["912866707","992584240"]
 USER_FILE = "user.txt"
 
 # File to store command logs
-LOG_FILE = "log.txt"
+LOG_FILE = "logies.txt"
 
 # Function to read user IDs from the file
 def read_users():
